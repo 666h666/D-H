@@ -1,0 +1,74 @@
+import random
+from docx import Document
+from docx.shared import Pt
+
+# 检查素数
+def is_prime(num):
+    if num <= 1:
+        return False
+    for i in range(2, int(num**0.5) + 1):
+        if num % i == 0:
+            return False
+    return True
+
+# 检查原根
+def is_primitive_root(g, p):
+    phi = p - 1
+    for i in range(2, phi + 1):
+        if pow(g, phi // i, p) == 1:
+            return False
+    return True
+
+# 选择素数和原根
+p = 101  # 示例素数
+g = 2    # 示例原根
+while not is_prime(p) or not is_primitive_root(g, p):
+    p = random.randint(100, 255)
+    g = random.randint(2, p - 1)
+    while not is_primitive_root(g, p):
+        g = random.randint(2, p - 1)
+
+# 构建单向函数
+def f(g, x, p):
+    return pow(g, x, p)
+
+# A和B选择私钥
+x_A = random.randint(1, p - 2)
+x_B = random.randint(1, p - 2)
+
+# 计算公钥
+A = f(g, x_A, p)
+B = f(g, x_B, p)
+
+# 交换公钥并计算共享密钥
+S_A = f(B, x_A, p)
+S_B = f(A, x_B, p)
+
+# 验证共享密钥是否相同
+assert S_A == S_B, "共享密钥不匹配"
+
+# 创建Word文档
+doc = Document()
+doc.add_heading('D-H密钥交换过程记录', 0)
+
+# 添加素数和原根
+doc.add_paragraph(f'选择的素数p: {p}')
+doc.add_paragraph(f'选择的原根g: {g}')
+
+# 添加私钥
+doc.add_paragraph(f'A的私钥x_A: {x_A}')
+doc.add_paragraph(f'B的私钥x_B: {x_B}')
+
+# 添加公钥
+doc.add_paragraph(f'A的公钥A: {A}')
+doc.add_paragraph(f'B的公钥B: {B}')
+
+# 添加共享密钥
+doc.add_paragraph(f'A计算的共享密钥S_A: {S_A}')
+doc.add_paragraph(f'B计算的共享密钥S_B: {S_B}')
+
+# 保存文档
+doc.save('DH_Key_Exchange_Record.docx')
+
+print(f"共享密钥为：{S_A}")
+print("文档已保存为 DH_Key_Exchange_Record.docx")
